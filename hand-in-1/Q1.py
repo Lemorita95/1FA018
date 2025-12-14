@@ -24,6 +24,12 @@ samples = data['Time (s)']
 # compute the estimator
 tau_hat = ML_estimator(samples)
 
+# evaluate second derivative
+n = len(samples)
+d2_dtau2 = (n/tau_hat) - (2/tau_hat) * samples.sum()
+print(d2_dtau2)
+print(f"it is {'' if d2_dtau2 < 0  else 'not'} a local maxima")
+
 # find the boundaries as a root solving problem
 lower, upper = find_boundaries(likelihood, samples, tau_hat)
 
@@ -82,7 +88,7 @@ for ax, n in zip(axes, N_array):
     ax.minorticks_on()
     # ax.legend(['Likelihood function'], fontsize=6, loc='upper right')
     ax.grid(True, linestyle='--', linewidth=0.25, alpha=0.7)
-    ax.set_title(rf'bias $b={(tau_hat - tau_true):.4f}$', fontsize=5)
+    # ax.set_title(rf'bias $b={(tau_hat - tau_true):.4f}$', fontsize=5)
 
 fig.supxlabel("Samples")
 fig.supylabel(r"Lifetime $\tau$ [s]")

@@ -32,10 +32,15 @@ uncertanties = data['sigma_squred']
     J (jacobian) = dy/dx --> (1/N)
     N: number of experiments
 '''
-N = len(measurements)
+
+def weighted_mean(measurements, uncertanties):
+    w_array = 1/uncertanties
+    return sum([x * w for x, w in zip(measurements, w_array)]) / sum(w_array)
+
+wmean = weighted_mean(measurements, uncertanties)
 
 # create a Nx1 Jacobian matrix
-J = np.array([1/N]*N) 
+J = np.array([w/sum(1/uncertanties) for w in 1/uncertanties]).T
 
 # an NxN uncertanties matrix
 Sigma = pd.DataFrame(np.diag(uncertanties),index=uncertanties.index,columns=uncertanties.index)
@@ -43,7 +48,7 @@ V_x = Sigma.to_numpy()
 
 V_y = J @ V_x @ J.T
 sigma_y = V_y**0.5
-print(f"{measurements.mean():.1g} +- {sigma_y:.1g}") # 1 significant figure due to uncertainty
+print(f"{wmean:.4g} +- {sigma_y:.4g}") # 1 significant figure due to uncertainty
 
 '''
     2.b)
@@ -86,23 +91,19 @@ x = np.linspace(mean - 4*sigma, mean + 4*sigma, 5000)
 parent = pdf(x, mean, sigma)
 
 confidence_level = 0.90
-alpha = (1 - confidence_level)/2
-cdf = 1 - np.array(integrate(x, parent, min(x), max(x)))
+alpha = (confidence_level) # one sided interval
+cdf = np.array(integrate(x, parent, min(x), max(x)))
 
 # find x value for 1 - alpha and alpha at the cdf
-idx_lower = np.argmin(abs(cdf - 1 + alpha))
 idx_upper = np.argmin(abs(cdf - alpha))
 
-print(f"frequentist confidence interval {confidence_level}: [{x[idx_lower]:.2f}, {x[idx_upper]:.2f}]")
+print(f"frequentist confidence interval {confidence_level}: {x[idx_upper]:.2f}")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(3.5,2.5), dpi=300)  # 1x2 grid
 ax1.plot(x, parent, c='black', lw=1, markersize=4)
-ax1.axvline(x[idx_lower], ls='--', c='red', lw=0.5, markersize=4)
 ax1.axvline(x[idx_upper], ls='--', c='red', lw=0.5, markersize=4)
 ax2.plot(x, cdf, c='black', lw=1, markersize=4)
 ax2.axhline(alpha, ls='--', c='red', lw=0.5, markersize=4)
-ax2.axhline(1-alpha, ls='--', c='red', lw=0.5, markersize=4)
-ax2.axvline(x[idx_lower], ls='--', c='red', lw=0.5, markersize=4)
 ax2.axvline(x[idx_upper], ls='--', c='red', lw=0.5, markersize=4)
 
 ax1.set_ylabel("Probability density function", fontsize=8)
@@ -134,22 +135,18 @@ parent = pdf(x, mean, sigma)
 trunc_parent = np.where(x<0, 0, parent)
 normalization = integrate(x, trunc_parent, 0, max(x))[-1]
 G = trunc_parent/normalization
-cdf_G = 1 - np.array(integrate(x, G, min(x), max(x)))
+cdf_G = np.array(integrate(x, G, min(x), max(x)))
 
 # find x value for 1 - alpha and alpha at the cdf
-idx_lower = np.argmin(abs(cdf_G - 1 + alpha))
 idx_upper = np.argmin(abs(cdf_G - alpha))
 
-print(f"bayesian confidence interval {confidence_level}: [{x[idx_lower]:.2f}, {x[idx_upper]:.2f}]")
+print(f"bayesian confidence interval {confidence_level}: {x[idx_upper]:.2f}")
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(3.5,2.5), dpi=300)  # 1x2 grid
 ax1.plot(x, trunc_parent/normalization, c='black', lw=1, markersize=4)
-ax1.axvline(x[idx_lower], ls='--', c='red', lw=0.5, markersize=4)
 ax1.axvline(x[idx_upper], ls='--', c='red', lw=0.5, markersize=4)
 ax2.plot(x, cdf_G, c='black', lw=1, markersize=4)
 ax2.axhline(alpha, ls='--', c='red', lw=0.5, markersize=4)
-ax2.axhline(1-alpha, ls='--', c='red', lw=0.5, markersize=4)
-ax2.axvline(x[idx_lower], ls='--', c='red', lw=0.5, markersize=4)
 ax2.axvline(x[idx_upper], ls='--', c='red', lw=0.5, markersize=4)
 
 ax1.set_ylabel("Probability density function", fontsize=8)

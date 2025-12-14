@@ -97,4 +97,4 @@ print(f"uncertainties:")
 print(f"\tr\tθ\tϕ")
 for i, v in enumerate(["r", "θ", "ϕ"]):
     print(f"{v}   ", end='')
-    print({", ".join(f"{x:.1g}" for x in V0[i])})
+    print({", ".join(f"{x:.4g}" for x in V0[i])})
