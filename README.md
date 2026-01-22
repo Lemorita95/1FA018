@@ -4,5 +4,11 @@ this is a repository that contains my assignments for the 1FA018 course at uppsa
 ## Exercise set 1
 [/hand-in-1](hand-in-1)
 
-## Exercise set 1
+## Exercise set 2
 [/hand-in-2](hand-in-2)
+
+## Exercise set 3
+[/hand-in-3](hand-in-2)
+
+## Lagrangian multiplier project
+[/mini-project](mini-project)
